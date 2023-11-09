@@ -1,19 +1,78 @@
-#include "main.h"
+#include <stdio.h>
+#include <unistd.h>
+#include <string.h>
+#include <stdlib.h>
 
-int main(int ac, char **argv)
+
+int main(void)
 {
-	char *prompt = "(Cshell) $ ";
-	char *lineptr;
-	size_t n = 0;
+    char *full_command = NULL, *copy_command = NULL;
+    size_t n = 0;
+    ssize_t nchars_read; /* number of characters the user types */
+    char *token;
+    const char *delim = " \n";
+    char **argv;
+    int i = 0; // x = 0;
+    int num_tokens = 0;
 
-	/* variable declaration */
-	(void)ac;
-	(void)argv;
+    // strcpy(command_copy, full_command);
+    /* print a prompt for the user to type something */
+    printf("$ ");
 
-	printf("%s", prompt);
-	getline(&lineptr, &n, stdin);
-	printf("%s\n", lineptr);
+    /* get the string that the user types in and pass it to full_command */
+    nchars_read = getline(&full_command, &n, stdin);
 
-	free(lineptr);
-	return (0);
+    /* let's allocate space to store the characters read by getline */
+    copy_command = malloc(sizeof(char) * nchars_read);
+
+    if (copy_command == NULL){
+        perror("tsh: memory allocation error");
+        return (-1);
+    }
+
+    /* make a copy of the command that was typed */
+    strcpy(copy_command, full_command);
+
+    /* check if the getline function failed or reached EOF or user use CTRL + D */
+    if (nchars_read == -1){
+        printf("Exiting shell....\n");
+        return (-1);
+    }
+    else {
+
+        /* split the string (full_command) into an array of words */
+        token = strtok(full_command, delim);
+
+        /* allocate space to store the variable arguments but before then determine how many tokens are there*/
+        while (token != NULL){
+            num_tokens++;
+            token = strtok(NULL, delim);
+        }
+        num_tokens++;
+        // printf(">>>>> %d \n", num_tokens);
+
+        /* use malloc to allocate enough space for the pointer to the argument variables */
+        argv = malloc(sizeof(char *) * num_tokens);
+
+        token = strtok(copy_command, delim);
+
+        for (i = 0; token != NULL; i++){
+            argv[i] = malloc(sizeof(char) * strlen(token));
+            strcpy(argv[i], token);
+
+            // printf(">>>>> %s \n", argv[i]);
+            token = strtok(NULL, delim);
+        }
+        argv[i] = NULL;
+
+        /* execute the commands with execve */
+
+
+        free(argv);
+        free(full_command);
+        free(copy_command);
+    }
+
+    return (0);
 }
+
