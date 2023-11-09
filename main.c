@@ -32,7 +32,7 @@ int main(int ac, char **argv){
         /* copy lineptr to lineptr_copy */
         strcpy(lineptr_copy, lineptr);
 
-        /********** split the string (lineptr) into an array of words ********/
+        /********** split the string into an array of words ********/
         /* calculate the total number of tokens */
         token = strtok(lineptr, delim);
 
